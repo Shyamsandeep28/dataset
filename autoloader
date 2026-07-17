@@ -1,0 +1,36 @@
+
+schema_path = "abfss://raw@sandeepstorage321.dfs.core.windows.net/schema/customers/"
+checkpoint_path = "abfss://raw@sandeepstorage321.dfs.core.windows.net/checkpoints/customers/"
+
+storage_account_name = "sandeepstorage321"
+
+raw_container = "raw"
+bronze_container = "bronze"
+silver_container = "silver"
+gold_container = "gold"
+
+# Access Key
+access_key = ""
+
+
+# ==========================================
+# SPARK CONFIGURATION
+# ==========================================
+
+configs = {
+    f"fs.azure.account.key.{storage_account_name}.dfs.core.windows.net": access_key
+}
+
+for key, value in configs.items():
+    spark.conf.set(key, value)
+
+df_with_autoloader = (
+    spark.readStream
+         .format("cloudFiles")
+         .option("cloudFiles.format", "csv")
+         .option("cloudFiles.schemaLocation", schema_path)
+         .option("header", "true")
+         .load("abfss://raw@sandeepstorage321.dfs.core.windows.net/customers/")
+)
+
+display(df_with_autoloader)
